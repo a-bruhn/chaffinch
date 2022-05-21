@@ -1,3 +1,5 @@
+[![a-bruhn](https://circleci.com/gh/a-bruhn/chaffinch.svg?style=svg)](https://app.circleci.com/pipelines/github/a-bruhn/chaffinch?branch=master&filter=all)
+
 # Chaffinch
 
 Chaffinch is a text editor written in Elixir using the [Ratatouille](https://github.com/ndreynolds/ratatouille) toolkit.
