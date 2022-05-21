@@ -40,24 +40,23 @@ defmodule Chaffinch do
   @backspace1 key(:backspace)
   @backspace2 key(:backspace2)
 
-  @nochar_noctrl_keys @cursor_keys ++ [
-    @spacebar,
-    @enter,
-    @tab_key,
-    @delete_key,
-    @backspace1,
-    @backspace2
-  ]
+  @nochar_noctrl_keys @cursor_keys ++
+                        [
+                          @spacebar,
+                          @enter,
+                          @tab_key,
+                          @delete_key,
+                          @backspace1,
+                          @backspace2
+                        ]
 
   @doc """
   Perform initial setup and output the initial app state.
   """
   def init(_context) do
-
-    Cursor.show_cursor
+    Cursor.show_cursor()
     ExTermbox.Bindings.set_cursor(@cursor_offset_x, @cursor_offset_y)
     %EditorState{cursor: %EditorCursor{offset_x: @cursor_offset_x, offset_y: @cursor_offset_y}}
-
   end
 
   @doc """
@@ -81,8 +80,12 @@ defmodule Chaffinch do
           @backspace2 -> Text.bwd_remove_char(model)
           _ -> model
         end
-      {:event, %{ch: ch}} when ch > 0 -> Text.insert_char(model, <<ch::utf8>>)
-      _ -> model
+
+      {:event, %{ch: ch}} when ch > 0 ->
+        Text.insert_char(model, <<ch::utf8>>)
+
+      _ ->
+        model
     end
   end
 
@@ -95,9 +98,13 @@ defmodule Chaffinch do
         for {textrow, idx} <- Enum.with_index(model.textrows) do
           label(content: "#{idx + 1} #{textrow |> Map.get(:text)}")
         end
+
         # Debugging output
-        label(content: "CX: #{model.cursor.x} -- CY #{model.cursor.y} " <> 
-          "-- LL #{Text.line_size(model) |> elem(1)} -- NROW #{length(model.textrows)}")
+        label(
+          content:
+            "CX: #{model.cursor.x} -- CY #{model.cursor.y} " <>
+              "-- LL #{Text.line_size(model) |> elem(1)} -- NROW #{length(model.textrows)}"
+        )
       end
     end
   end

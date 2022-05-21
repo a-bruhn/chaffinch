@@ -3,7 +3,7 @@ defmodule ChaffinchTest do
   doctest Chaffinch
 
   @test_state %EditorState{
-    textrows: [%EditorText{}], 
+    textrows: [%EditorText{}],
     cursor: %EditorCursor{x: 0, y: 0}
   }
 
@@ -14,5 +14,4 @@ defmodule ChaffinchTest do
   test "try move oob" do
     assert @test_state == Cursor.move_left(@test_state)
   end
-
 end
