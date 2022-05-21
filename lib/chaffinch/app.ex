@@ -11,7 +11,7 @@ defmodule Chaffinch.App do
 
   alias Ratatouille.Runtime.{Command, Subscription}
 
-  alias Chaffinch.Model.{Cursor, Text, EditorState, EditorCursor}
+  alias Chaffinch.App.{Cursor, Text, EditorState, EditorCursor}
 
   @app_title "Chaffinch Text Editor"
 
@@ -120,10 +120,3 @@ defmodule Chaffinch.App do
     end
   end
 end
-
-Ratatouille.run(
-  Chaffinch,
-  quit_events: [
-    {:key, Ratatouille.Constants.key(:ctrl_q)}
-  ]
-)
