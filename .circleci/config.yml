@@ -1,5 +1,6 @@
 version: 2.1 
-
+orbs:
+  browser-tools: circleci/browser-tools@1.1
 jobs:  # basic units of work in a run
   build:  # runs not using Workflows must have a `build` job as entry point
     parallelism: 1  # run only one instance of this job
