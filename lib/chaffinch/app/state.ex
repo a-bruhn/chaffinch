@@ -3,10 +3,12 @@
 #  Add type specs
 #  Separate concerns and use a single module to interact with the input/output layers
 
-defmodule Text do
+defmodule Chaffinch.App.Text do
   @moduledoc """
   Operations on text stored within the row-wise list of text structs inside the model struct.
   """
+
+  alias Chaffinch.App.{Cursor, State, EditorText}
 
   require Logger
 
@@ -239,7 +241,7 @@ defmodule Text do
       )
 end
 
-defmodule Cursor do
+defmodule Chaffinch.App.Cursor do
   @moduledoc """
   Operations on the cursor stored in the cursor struct inside the model struct.
   """
@@ -247,6 +249,8 @@ defmodule Cursor do
   require ExTermbox.Bindings
   require IO.ANSI.Sequence
   require Logger
+
+  alias Chaffinch.App.Text
 
   IO.ANSI.Sequence.defsequence(:_show_cursor, "?25", "h")
   IO.ANSI.Sequence.defsequence(:_hide_cursor, "?25", "l")
@@ -444,7 +448,7 @@ defmodule Cursor do
   end
 end
 
-defmodule State do
+defmodule Chaffinch.App.State do
   @moduledoc """
   Module for other state modulations.
   """

@@ -2,6 +2,8 @@ defmodule ChaffinchTest do
   use ExUnit.Case
   doctest Chaffinch
 
+  alias Chaffinch.App.{Text, Cursor, EditorState, EditorText, EditorCursor}
+
   @test_state %EditorState{
     textrows: [%EditorText{}],
     cursor: %EditorCursor{x: 0, y: 0}
