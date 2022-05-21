@@ -10,7 +10,7 @@ jobs:  # basic units of work in a run
           password: $DOCKERHUB_PASSWORD  # context / project UI env-var reference
         environment:  # environment variables for primary container
           MIX_ENV: test
-          TERM: xterm-256color
+          TERM: xterm
 
     working_directory: ~/app  # directory where steps will run
 
