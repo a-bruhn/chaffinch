@@ -4,7 +4,7 @@ jobs:  # basic units of work in a run
   build:  # runs not using Workflows must have a `build` job as entry point
     parallelism: 1  # run only one instance of this job
     docker:  # run the steps with Docker
-      - image: cimg/elixir:1.12.2  # ...with this image as the primary container; this is where all `steps` will run
+      - image: cimg/elixir:1.12.2-browsers  # ...with this image as the primary container; this is where all `steps` will run
         auth:
           username: mydockerhub-user
           password: $DOCKERHUB_PASSWORD  # context / project UI env-var reference
@@ -15,6 +15,7 @@ jobs:  # basic units of work in a run
     working_directory: ~/app  # directory where steps will run
 
     steps:  # commands that comprise the `build` job
+      - browser-tools/install-browser-tools
       - checkout  # check out source code to working directory
       - run: sudo apt update
       - run: sudo apt install python3  # install python for ex_termbox build
