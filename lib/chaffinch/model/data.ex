@@ -1,17 +1,19 @@
-defmodule EditorCursor do
+defmodule Chaffinch.Model.EditorCursor do
   defstruct x: 0,
             y: 0,
             offset_x: 0,
             offset_y: 0
 end
 
-defmodule EditorText do
+defmodule Chaffinch.Model.EditorText do
   defstruct text: "",
             offset_x: 0,
             offset_y: 0
 end
 
-defmodule EditorState do
+defmodule Chaffinch.Model.EditorState do
+  alias Chaffinch.Model.{EditorText, EditorCursor}
+
   defstruct [
     :filename,
     textrows: [
