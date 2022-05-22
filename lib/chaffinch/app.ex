@@ -7,6 +7,7 @@ defmodule Chaffinch.App do
 
   import Ratatouille.Constants, only: [key: 1]
   import Ratatouille.View
+  import Ratatouille.Window
   require ExTermbox.Bindings
 
   alias Ratatouille.Runtime.{Command, Subscription}
@@ -104,19 +105,24 @@ defmodule Chaffinch.App do
   """
   @impl true
   def render(model) do
-    view do
+    b_bar =
+      bar do
+        label(content: "Quit: Hold CTRL-Q | Save: CTRL-S")
+      end
+
+    view bottom_bar: b_bar do
       panel(title: @app_title, height: :fill) do
         for {textrow, idx} <- Enum.with_index(model.textrows) do
           label(content: "#{idx + 1} #{textrow |> Map.get(:text)}")
         end
-
-        # Debugging output
-        # label(
-        #  content:
-        #    "CX: #{model.cursor.x} -- CY #{model.cursor.y} " <>
-        #      "-- LL #{Text.line_size(model) |> elem(1)} -- NROW #{length(model.textrows)}"
-        # )
       end
+
+      # Debugging output
+      # label(
+      #  content:
+      #    "CX: #{model.cursor.x} -- CY #{model.cursor.y} " <>
+      #      "-- LL #{Text.line_size(model) |> elem(1)} -- NROW #{length(model.textrows)}"
+      # )
     end
   end
 end

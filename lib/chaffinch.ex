@@ -7,7 +7,8 @@ defmodule Chaffinch do
 
   def start(_type, _args) do
     children = [
-      {Ratatouille.Runtime.Supervisor, runtime: [app: Chaffinch.App]}
+      {Ratatouille.Runtime.Supervisor,
+       runtime: [app: Chaffinch.App, quit_events: [{:key, Ratatouille.Constants.key(:ctrl_q)}]]}
     ]
 
     Supervisor.start_link(
@@ -15,5 +16,9 @@ defmodule Chaffinch do
       strategy: :one_for_one,
       name: Chaffinch.Supervisor
     )
+  end
+
+  def stop(_) do
+    System.halt()
   end
 end

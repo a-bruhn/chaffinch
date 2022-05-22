@@ -457,4 +457,7 @@ defmodule Chaffinch.App.State do
   Increment the dirtyness of the editor state
   """
   def make_dirty(model), do: %{model | dirty: model.dirty + 1}
+
+  def is_dirty?(model) when model.dirty != 0, do: true
+  def is_dirty?(_other), do: false
 end
