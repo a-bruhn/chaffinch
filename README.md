@@ -15,7 +15,7 @@ I do not in any way claim that this code is in any way idiomatic or well thought
 - [ ] X/Y scrolling with scrollbars
 - [ ] File I/O
   - [ ] Loading a file with command line arguments
-  - [ ] Saving the current state
+  - [x] Saving the current state
   - [ ] Prompt when trying to close in a dirty state
 - [ ] More advanced controls, user configurations
 - [ ] Menus/tabs ?

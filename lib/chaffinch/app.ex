@@ -53,7 +53,8 @@ defmodule Chaffinch.App do
                           @tab_key,
                           @delete_key,
                           @backspace1,
-                          @backspace2
+                          @backspace2,
+                          @save_key
                         ]
 
   @doc """

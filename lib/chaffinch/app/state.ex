@@ -47,10 +47,13 @@ defmodule Chaffinch.App.Text do
   """
   def save_text(model) do
     path = Path.join(model.fileinfo.path, model.fileinfo.filename)
+    text_len = length(model.textrows)
+    last_line = List.last(model.textrows).text
 
     model.textrows
-    |> Enum.map(fn x -> x.text end)
-    |> Enum.join('\n')
+    |> Enum.map(fn x -> x.text <> "\n" end)
+    |> List.replace_at(text_len - 1, last_line)
+    |> Enum.join()
     |> FileIO.write_file(path)
     |> case do
       {:ok, _} ->
@@ -204,13 +207,30 @@ defmodule Chaffinch.App.Text do
       {:ok, :line_beginning} ->
         cond do
           model.cursor.y != 0 ->
-            model |> Cursor.move_left() |> merge_lines(model.cursor.y - 1)
+            model
+            |> Cursor.move_left()
+            |> merge_lines(model.cursor.y - 1)
 
           true ->
             model
         end
 
-      {:ok, _} ->
+      {:ok, :line_end} ->
+        cond do
+          model.cursor.y != 0 and line_size(model) == {:ok, 0} ->
+            model
+            |> Cursor.move_left()
+            |> merge_lines(model.cursor.y - 1)
+
+          true ->
+            new_text = _remove_chars(current_row_text, model.cursor.x - 1, model.cursor.x)
+
+            model
+            |> update_row(%TextData{text: new_text})
+            |> Cursor.move_left()
+        end
+
+      {:ok, :in_line} ->
         new_text = _remove_chars(current_row_text, model.cursor.x - 1, model.cursor.x)
 
         model
