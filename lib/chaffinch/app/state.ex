@@ -34,11 +34,11 @@ defmodule Chaffinch.App.Text do
     |> FileIO.import_file()
     |> case do
       {:ok, new_textrows_list} ->
-        new_model = put_in(model.textrows, new_textrows_list)
-        %{new_model | statusmsg: new_model.fileinfo.filename}
+        new_model = State.update_status_msg(model)
+        put_in(new_model.textrows, new_textrows_list)
 
       {:error, _} ->
-        put_in(model.statusmsg, "ERROR: Cannot load #{model.fileinfo.filename}.")
+        State.update_status_msg(model, "ERROR: Cannot load #{model.fileinfo.filename}.")
     end
   end
 
@@ -57,10 +57,10 @@ defmodule Chaffinch.App.Text do
     |> FileIO.write_file(path)
     |> case do
       {:ok, _} ->
-        %{model | dirty: 0}
+        %{model | dirty: 0} |> State.update_status_msg()
 
       {:error, _} ->
-        put_in(model.statusmsg, "ERROR: Cannot save #{model.fileinfo.filename}.")
+        State.update_status_msg(model, "ERROR: Cannot save #{model.fileinfo.filename}.")
     end
   end
 
@@ -511,8 +511,37 @@ defmodule Chaffinch.App.State do
   @doc """
   Increment the dirtyness of the editor state
   """
-  def make_dirty(model), do: %{model | dirty: model.dirty + 1}
+  def make_dirty(model), do: %{model | dirty: model.dirty + 1} |> update_status_msg()
 
   def is_dirty?(model) when model.dirty != 0, do: true
   def is_dirty?(_other), do: false
+
+  @doc """
+  Update the status with either filename and the state (dirty/clean) or an error message
+  """
+  def update_status_msg(model, errormsg \\ nil) do
+    cond do
+      errormsg != nil ->
+        %{model | status_msg: {:error, errormsg}}
+
+      true ->
+        %{model | status_msg: _build_status_message(model)}
+    end
+  end
+
+  defp _build_status_message(model) do
+    cond do
+      model.fileinfo != nil ->
+        cond do
+          is_dirty?(model) ->
+            {:ok, model.fileinfo.filename <> "*"}
+
+          true ->
+            {:ok, model.fileinfo.filename}
+        end
+
+      true ->
+        {:ok, ""}
+    end
+  end
 end

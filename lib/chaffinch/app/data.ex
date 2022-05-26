@@ -25,7 +25,7 @@ defmodule Chaffinch.App.EditorState do
 
   defstruct [
     :fileinfo,
-    :statusmsg,
+    status_msg: "",
     textrows: [
       %TextData{text: "You may edit me."},
       %TextData{text: "I promise not to be mad."}

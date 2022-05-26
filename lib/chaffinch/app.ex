@@ -5,7 +5,7 @@ defmodule Chaffinch.App do
 
   @behaviour Ratatouille.App
 
-  import Ratatouille.Constants, only: [key: 1]
+  import Ratatouille.Constants, only: [key: 1, color: 1]
   import Ratatouille.View
   import Ratatouille.Window
   require ExTermbox.Bindings
@@ -18,7 +18,7 @@ defmodule Chaffinch.App do
 
   @tab_size 4
   @cursor_offset_x 4
-  @cursor_offset_y 2
+  @cursor_offset_y 3
 
   @up key(:arrow_up)
   @down key(:arrow_down)
@@ -119,7 +119,18 @@ defmodule Chaffinch.App do
         label(content: "Quit: Hold CTRL-Q | Save: CTRL-S")
       end
 
-    view bottom_bar: b_bar do
+    t_bar =
+      bar do
+        case model.status_msg do
+          {:ok, message} ->
+            label(content: message)
+
+          {:error, message} ->
+            label(content: message, color: color(:red))
+        end
+      end
+
+    view bottom_bar: b_bar, top_bar: t_bar do
       panel(title: @app_title, height: :fill) do
         for {textrow, idx} <- Enum.with_index(model.textrows) do
           label(content: "#{idx + 1} #{textrow |> Map.get(:text)}")
