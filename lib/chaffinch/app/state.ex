@@ -8,7 +8,7 @@ defmodule Chaffinch.App.Text do
   Operations on text stored within the row-wise list of text structs inside the model struct.
   """
 
-  alias Chaffinch.App.{Cursor, State, EditorText}
+  alias Chaffinch.App.{Cursor, State, TextData, FileIO}
 
   require Logger
 
@@ -27,6 +27,41 @@ defmodule Chaffinch.App.Text do
   end
 
   @doc """
+  Import a textfile into the editor
+  """
+  def import_text(model) do
+    Path.join(model.fileinfo.path, model.fileinfo.filename)
+    |> FileIO.import_file()
+    |> case do
+      {:ok, new_textrows_list} ->
+        new_model = put_in(model.textrows, new_textrows_list)
+        %{new_model | statusmsg: new_model.fileinfo.filename}
+
+      {:error, _} ->
+        put_in(model.statusmsg, "ERROR: Cannot load #{model.fileinfo.filename}.")
+    end
+  end
+
+  @doc """
+  Save the current state of the text
+  """
+  def save_text(model) do
+    path = Path.join(model.fileinfo.path, model.fileinfo.filename)
+
+    model.textrows
+    |> Enum.map(fn x -> x.text end)
+    |> Enum.join('\n')
+    |> FileIO.write_file(path)
+    |> case do
+      {:ok, _} ->
+        %{model | dirty: 0}
+
+      {:error, _} ->
+        put_in(model.statusmsg, "ERROR: Cannot save #{model.fileinfo.filename}.")
+    end
+  end
+
+  @doc """
   Merge two text rows at index `idx`
   """
   def merge_lines(model, idx) do
@@ -36,7 +71,7 @@ defmodule Chaffinch.App.Text do
     new_textrow = [row1, row2] |> Enum.join()
 
     new_textrows_list =
-      List.replace_at(model.textrows, idx, %EditorText{text: new_textrow})
+      List.replace_at(model.textrows, idx, %TextData{text: new_textrow})
       |> List.delete_at(idx + 1)
 
     put_in(model.textrows, new_textrows_list)
@@ -50,7 +85,7 @@ defmodule Chaffinch.App.Text do
 
     model
     |> add_row(Enum.join(next_line))
-    |> update_row(%EditorText{text: this_line})
+    |> update_row(%TextData{text: this_line})
     |> Cursor.move_right()
     |> Cursor.sync_cursor()
     |> State.make_dirty()
@@ -147,7 +182,7 @@ defmodule Chaffinch.App.Text do
         new_text = _remove_chars(current_row_text, model.cursor.x, model.cursor.x + 1)
 
         model
-        |> update_row(%EditorText{text: new_text})
+        |> update_row(%TextData{text: new_text})
     end
     |> Cursor.sync_cursor()
     |> State.make_dirty()
@@ -179,7 +214,7 @@ defmodule Chaffinch.App.Text do
         new_text = _remove_chars(current_row_text, model.cursor.x - 1, model.cursor.x)
 
         model
-        |> update_row(%EditorText{text: new_text})
+        |> update_row(%TextData{text: new_text})
         |> Cursor.move_left()
     end
     |> Cursor.sync_cursor()
@@ -217,7 +252,7 @@ defmodule Chaffinch.App.Text do
     do:
       put_in(
         model.textrows,
-        List.insert_at(model.textrows, model.cursor.y + 1, %EditorText{})
+        List.insert_at(model.textrows, model.cursor.y + 1, %TextData{})
       )
 
   @doc """
@@ -227,7 +262,7 @@ defmodule Chaffinch.App.Text do
     do:
       put_in(
         model.textrows,
-        List.insert_at(model.textrows, model.cursor.y + 1, %EditorText{text: new_row_text})
+        List.insert_at(model.textrows, model.cursor.y + 1, %TextData{text: new_row_text})
       )
 
   @doc """
@@ -237,7 +272,7 @@ defmodule Chaffinch.App.Text do
     do:
       put_in(
         model.textrows,
-        List.insert_at(model.textrows, idx, %EditorText{text: new_row_text})
+        List.insert_at(model.textrows, idx, %TextData{text: new_row_text})
       )
 end
 

@@ -12,7 +12,7 @@ defmodule Chaffinch.App do
 
   alias Ratatouille.Runtime.{Command, Subscription}
 
-  alias Chaffinch.App.{Cursor, Text, EditorState, EditorCursor}
+  alias Chaffinch.App.{Cursor, Text, EditorState, CursorData, FileData}
 
   @app_title "Chaffinch Text Editor"
 
@@ -44,6 +44,8 @@ defmodule Chaffinch.App do
   @backspace1 key(:backspace)
   @backspace2 key(:backspace2)
 
+  @save_key key(:ctrl_s)
+
   @nochar_noctrl_keys @cursor_keys ++
                         [
                           @spacebar,
@@ -61,7 +63,12 @@ defmodule Chaffinch.App do
   def init(_context) do
     Cursor.show_cursor()
     ExTermbox.Bindings.set_cursor(@cursor_offset_x, @cursor_offset_y)
-    %EditorState{cursor: %EditorCursor{offset_x: @cursor_offset_x, offset_y: @cursor_offset_y}}
+
+    %EditorState{
+      cursor: %CursorData{offset_x: @cursor_offset_x, offset_y: @cursor_offset_y},
+      fileinfo: %FileData{filename: "welcome.txt", path: File.cwd!()}
+    }
+    |> Text.import_text()
   end
 
   @doc """
@@ -84,6 +91,7 @@ defmodule Chaffinch.App do
           @delete_key -> Text.fwd_remove_char(model)
           @backspace1 -> Text.bwd_remove_char(model)
           @backspace2 -> Text.bwd_remove_char(model)
+          @save_key -> Text.save_text(model)
           _ -> model
         end
 
