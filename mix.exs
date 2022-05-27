@@ -24,7 +24,7 @@ defmodule Chaffinch.MixProject do
   defp deps do
     [
       {:ratatouille, "~> 0.5.1"}
-      # {:dep_from_git, git: "https://github.com/elixir-lang/my_dep.git", tag: "0.1.0"}
+      # {:distillery, "~> 2.1.1"}
     ]
   end
 

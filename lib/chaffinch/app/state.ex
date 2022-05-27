@@ -305,7 +305,7 @@ defmodule Chaffinch.App.Cursor do
   require IO.ANSI.Sequence
   require Logger
 
-  alias Chaffinch.App.Text
+  alias Chaffinch.App.{Text, State}
 
   IO.ANSI.Sequence.defsequence(:_show_cursor, "?25", "h")
   IO.ANSI.Sequence.defsequence(:_hide_cursor, "?25", "l")
@@ -365,6 +365,7 @@ defmodule Chaffinch.App.Cursor do
       :end -> model |> goto_end
     end
     |> sync_cursor
+    |> State.update_status_msg()
   end
 
   @doc """
@@ -530,18 +531,20 @@ defmodule Chaffinch.App.State do
   end
 
   defp _build_status_message(model) do
+    pos_string = " | Line #{model.cursor.y + 1} | Column #{model.cursor.x + 1}"
+
     cond do
       model.fileinfo != nil ->
         cond do
           is_dirty?(model) ->
-            {:ok, model.fileinfo.filename <> "*"}
+            {:ok, "File: " <> model.fileinfo.filename <> "*" <> pos_string}
 
           true ->
-            {:ok, model.fileinfo.filename}
+            {:ok, "File: " <> model.fileinfo.filename <> pos_string}
         end
 
       true ->
-        {:ok, ""}
+        {:ok, "No File" <> pos_string}
     end
   end
 end

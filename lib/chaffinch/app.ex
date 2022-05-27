@@ -12,7 +12,7 @@ defmodule Chaffinch.App do
 
   alias Ratatouille.Runtime.{Command, Subscription}
 
-  alias Chaffinch.App.{Cursor, Text, EditorState, CursorData, FileData}
+  alias Chaffinch.App.{Cursor, Text, EditorState, CursorData, FileData, State}
 
   @app_title "Chaffinch Text Editor"
 
@@ -65,11 +65,24 @@ defmodule Chaffinch.App do
     Cursor.show_cursor()
     ExTermbox.Bindings.set_cursor(@cursor_offset_x, @cursor_offset_y)
 
-    %EditorState{
+    full_path = System.get_env("CHAFFINCH_FILE")
+
+    fileinfo =
+      case full_path do
+        nil -> nil
+        _ -> %FileData{filename: Path.basename(full_path), path: Path.dirname(full_path)}
+      end
+
+    initial_state = %EditorState{
       cursor: %CursorData{offset_x: @cursor_offset_x, offset_y: @cursor_offset_y},
-      fileinfo: %FileData{filename: "welcome.txt", path: File.cwd!()}
+      fileinfo: fileinfo
     }
-    |> Text.import_text()
+
+    case fileinfo do
+      nil -> initial_state
+      _ -> initial_state |> Text.import_text()
+    end
+    |> State.update_status_msg()
   end
 
   @doc """
@@ -126,7 +139,7 @@ defmodule Chaffinch.App do
             label(content: message)
 
           {:error, message} ->
-            label(content: message, color: color(:red))
+            label(content: "! " <> message, color: color(:red))
         end
       end
 
@@ -136,13 +149,6 @@ defmodule Chaffinch.App do
           label(content: "#{idx + 1} #{textrow |> Map.get(:text)}")
         end
       end
-
-      # Debugging output
-      # label(
-      #  content:
-      #    "CX: #{model.cursor.x} -- CY #{model.cursor.y} " <>
-      #      "-- LL #{Text.line_size(model) |> elem(1)} -- NROW #{length(model.textrows)}"
-      # )
     end
   end
 end

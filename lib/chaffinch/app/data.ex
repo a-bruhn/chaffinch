@@ -25,11 +25,8 @@ defmodule Chaffinch.App.EditorState do
 
   defstruct [
     :fileinfo,
-    status_msg: "",
-    textrows: [
-      %TextData{text: "You may edit me."},
-      %TextData{text: "I promise not to be mad."}
-    ],
+    status_msg: {:ok, ""},
+    textrows: [%TextData{}],
     cursor: %CursorData{},
     dirty: 0,
     tab: "    "
