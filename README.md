@@ -29,10 +29,10 @@ export CHAFFINCH_FILE=./welcome.txt && _build/dev/rel/chaffinch/bin/chaffinch st
   - [x] Basic control shortcuts
   - [x] File name and status at the top
 - [ ] X/Y scrolling with scrollbars
-- [ ] File I/O
+- [x] File I/O
   - [x] Loading a file ~with command line arguments~ through an environment variable
   - [x] Saving the current state
-  - [ ] Prompt when trying to close in a dirty state
+  - [x] Prompt when trying to close in a dirty state
 - [ ] More advanced controls, user configurations
 - [ ] Improved design
 - [ ] Menus/tabs ?

@@ -519,6 +519,9 @@ defmodule Chaffinch.App.State do
   def is_dirty?(model) when model.dirty != 0, do: true
   def is_dirty?(_other), do: false
 
+  def is_editable?(model) when model.active_view == :text, do: true
+  def is_editable?(_other), do: false
+
   @doc """
   Update the status with either filename and the state (dirty/clean) or an error message
   """
@@ -554,6 +557,14 @@ defmodule Chaffinch.App.State do
       :text -> Text.save_text(model)
       :quit -> quit()
     end
+  end
+
+  @doc """
+  Return to the text from another view
+  """
+  def return_to_text(model) do
+    Cursor.show_cursor()
+    %{model | active_view: :text}
   end
 
   defp _build_status_message(model) do

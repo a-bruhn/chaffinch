@@ -5,13 +5,11 @@ defmodule Chaffinch.App do
 
   @behaviour Ratatouille.App
 
-  import Ratatouille.Constants, only: [key: 1, color: 1]
-  import Ratatouille.View
-  import Ratatouille.Window
+  import Ratatouille.Constants, only: [key: 1]
 
   require ExTermbox.Bindings
 
-  alias Ratatouille.Runtime.{Command, Subscription}
+  alias Ratatouille.Runtime.{Subscription}
   alias Chaffinch.App.{Cursor, Text, EditorState, CursorData, FileData, State, View}
 
   @tab_size 4
@@ -44,18 +42,20 @@ defmodule Chaffinch.App do
 
   @save_key key(:ctrl_s)
   @quit_key key(:ctrl_q)
+  @escape key(:esc)
 
-  @nochar_noctrl_keys @cursor_keys ++
-                        [
-                          @spacebar,
-                          @enter,
-                          @tab_key,
-                          @delete_key,
-                          @backspace1,
-                          @backspace2,
-                          @save_key,
-                          @quit_key
-                        ]
+  @nochar_keys @cursor_keys ++
+                 [
+                   @spacebar,
+                   @enter,
+                   @tab_key,
+                   @delete_key,
+                   @backspace1,
+                   @backspace2,
+                   @save_key,
+                   @quit_key,
+                   @escape
+                 ]
 
   @doc """
   Perform initial setup and output the initial app state.
@@ -87,27 +87,41 @@ defmodule Chaffinch.App do
 
   @doc """
   Update the model based on the occuring event.
+
+  #TODO: Improve readability
   """
   @impl true
   def update(model, msg) do
     case msg do
-      {:event, %{key: key}} when key in @nochar_noctrl_keys ->
-        case key do
-          @up -> Cursor.move(model, :up)
-          @down -> Cursor.move(model, :down)
-          @left -> Cursor.move(model, :left)
-          @right -> Cursor.move(model, :right)
-          @home -> Cursor.move(model, :home)
-          @end_key -> Cursor.move(model, :end)
-          @tab_key -> Text.insert_char(model, model.tab)
-          @spacebar -> Text.insert_char(model, <<0x20>>)
-          @enter -> Text.insert_linebreak(model)
-          @delete_key -> Text.fwd_remove_char(model)
-          @backspace1 -> Text.bwd_remove_char(model)
-          @backspace2 -> Text.bwd_remove_char(model)
-          @save_key -> State.process_save_command(model)
-          @quit_key -> State.process_quit_command(model)
-          _ -> model
+      {:event, %{key: key}} when key in @nochar_keys ->
+        cond do
+          State.is_editable?(model) ->
+            case key do
+              @up -> Cursor.move(model, :up)
+              @down -> Cursor.move(model, :down)
+              @left -> Cursor.move(model, :left)
+              @right -> Cursor.move(model, :right)
+              @home -> Cursor.move(model, :home)
+              @end_key -> Cursor.move(model, :end)
+              @tab_key -> Text.insert_char(model, model.tab)
+              @spacebar -> Text.insert_char(model, <<0x20>>)
+              @enter -> Text.insert_linebreak(model)
+              @delete_key -> Text.fwd_remove_char(model)
+              @backspace1 -> Text.bwd_remove_char(model)
+              @backspace2 -> Text.bwd_remove_char(model)
+              @save_key -> State.process_save_command(model)
+              @quit_key -> State.process_quit_command(model)
+              @escape -> State.return_to_text(model)
+              _ -> model
+            end
+
+          true ->
+            case key do
+              @save_key -> State.process_save_command(model)
+              @quit_key -> State.process_quit_command(model)
+              @escape -> State.return_to_text(model)
+              _ -> model
+            end
         end
 
       {:event, %{ch: ch}} when ch > 0 ->

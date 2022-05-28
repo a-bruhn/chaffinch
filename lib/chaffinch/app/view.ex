@@ -44,17 +44,11 @@ defmodule Chaffinch.App.View do
 
   defp _render_quit_prompt() do
     label(
-      content: "Text has unsaved changes. Press:",
-      color: color(:blue)
-    )
-
-    label(
-      content: "    CTRL-S to save and quit",
-      color: color(:blue)
-    )
-
-    label(
-      content: "    CTRL-Q to close anyway",
+      content:
+        "Text has unsaved changes. Press:\n\n" <>
+          "    CTRL-S to save and quit\n" <>
+          "    CTRL-Q to close anyway\n" <>
+          "    ESC to go back to editing",
       color: color(:blue)
     )
   end
