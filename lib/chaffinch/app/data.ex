@@ -25,6 +25,7 @@ defmodule Chaffinch.App.EditorState do
 
   defstruct [
     :fileinfo,
+    active_view: :text,
     status_msg: {:ok, ""},
     textrows: [%TextData{}],
     cursor: %CursorData{},

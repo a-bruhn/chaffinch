@@ -7,8 +7,7 @@ defmodule Chaffinch do
 
   def start(_type, _args) do
     children = [
-      {Ratatouille.Runtime.Supervisor,
-       runtime: [app: Chaffinch.App, quit_events: [{:key, Ratatouille.Constants.key(:ctrl_q)}]]}
+      {Ratatouille.Runtime.Supervisor, runtime: [app: Chaffinch.App]}
     ]
 
     Supervisor.start_link(

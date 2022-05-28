@@ -509,6 +509,8 @@ defmodule Chaffinch.App.State do
   Module for other state modulations.
   """
 
+  alias Chaffinch.App.{Text, Cursor}
+
   @doc """
   Increment the dirtyness of the editor state
   """
@@ -530,6 +532,30 @@ defmodule Chaffinch.App.State do
     end
   end
 
+  @doc """
+  Set the active view to the `quitting in a dirty state` prompt if the state is in face dirty
+  """
+  def process_quit_command(model) do
+    cond do
+      model.active_view == :text and is_dirty?(model) ->
+        Cursor.hide_cursor()
+        %{model | active_view: :quit}
+
+      true ->
+        quit()
+    end
+  end
+
+  @doc """
+  Save the current state of the document with or without saving depending on the active view
+  """
+  def process_save_command(model) do
+    case model.active_view do
+      :text -> Text.save_text(model)
+      :quit -> quit()
+    end
+  end
+
   defp _build_status_message(model) do
     pos_string = " | Line #{model.cursor.y + 1} | Column #{model.cursor.x + 1}"
 
@@ -546,5 +572,10 @@ defmodule Chaffinch.App.State do
       true ->
         {:ok, "No File" <> pos_string}
     end
+  end
+
+  def quit() do
+    System.cmd("reset", [])
+    System.halt()
   end
 end

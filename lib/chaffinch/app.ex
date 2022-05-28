@@ -8,13 +8,11 @@ defmodule Chaffinch.App do
   import Ratatouille.Constants, only: [key: 1, color: 1]
   import Ratatouille.View
   import Ratatouille.Window
+
   require ExTermbox.Bindings
 
   alias Ratatouille.Runtime.{Command, Subscription}
-
-  alias Chaffinch.App.{Cursor, Text, EditorState, CursorData, FileData, State}
-
-  @app_title "Chaffinch Text Editor"
+  alias Chaffinch.App.{Cursor, Text, EditorState, CursorData, FileData, State, View}
 
   @tab_size 4
   @cursor_offset_x 4
@@ -45,6 +43,7 @@ defmodule Chaffinch.App do
   @backspace2 key(:backspace2)
 
   @save_key key(:ctrl_s)
+  @quit_key key(:ctrl_q)
 
   @nochar_noctrl_keys @cursor_keys ++
                         [
@@ -54,7 +53,8 @@ defmodule Chaffinch.App do
                           @delete_key,
                           @backspace1,
                           @backspace2,
-                          @save_key
+                          @save_key,
+                          @quit_key
                         ]
 
   @doc """
@@ -105,7 +105,8 @@ defmodule Chaffinch.App do
           @delete_key -> Text.fwd_remove_char(model)
           @backspace1 -> Text.bwd_remove_char(model)
           @backspace2 -> Text.bwd_remove_char(model)
-          @save_key -> Text.save_text(model)
+          @save_key -> State.process_save_command(model)
+          @quit_key -> State.process_quit_command(model)
           _ -> model
         end
 
@@ -127,28 +128,7 @@ defmodule Chaffinch.App do
   """
   @impl true
   def render(model) do
-    b_bar =
-      bar do
-        label(content: "Quit: Hold CTRL-Q | Save: CTRL-S")
-      end
-
-    t_bar =
-      bar do
-        case model.status_msg do
-          {:ok, message} ->
-            label(content: message)
-
-          {:error, message} ->
-            label(content: "! " <> message, color: color(:red))
-        end
-      end
-
-    view bottom_bar: b_bar, top_bar: t_bar do
-      panel(title: @app_title, height: :fill) do
-        for {textrow, idx} <- Enum.with_index(model.textrows) do
-          label(content: "#{idx + 1} #{textrow |> Map.get(:text)}")
-        end
-      end
-    end
+    model
+    |> View.render_active_view()
   end
 end
