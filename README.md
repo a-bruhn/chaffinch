@@ -4,19 +4,36 @@
 
 Chaffinch is a text editor written in Elixir using the [Ratatouille](https://github.com/ndreynolds/ratatouille) toolkit.
 At the moment, the project is basically a learning exercise for me to get comfortable with Elixir.
-I do not in any way claim that this code is in any way idiomatic or well thought out, but I hope it might become so.
+I do not in any way claim that this code is idiomatic or well thought out, but I hope it might become so.
+
+## How to run it
+
+[Install elixir](https://elixir-lang.org/install.html), clone this repository, and build a release:
+
+```bash
+mix deps.get
+mix compile
+mix release
+```
+
+At the moment, you have to set the file to be opened though an environment variable. You can start the application with a file opened like this:
+
+```bash
+export CHAFFINCH_FILE=./welcome.txt && _build/dev/rel/chaffinch/bin/chaffinch start
+```
 
 ## Roadmap
 
 - [x] Basic text editing in frame
-- [ ] Status and message bars
+- [x] Status and message bars
   - [x] Basic control shortcuts
-  - [ ] File name and status at the top
+  - [x] File name and status at the top
 - [ ] X/Y scrolling with scrollbars
-- [ ] File I/O
-  - [ ] Loading a file with command line arguments
-  - [ ] Saving the current state
-  - [ ] Prompt when trying to close in a dirty state
+- [x] File I/O
+  - [x] Loading a file ~with command line arguments~ through an environment variable
+  - [x] Saving the current state
+  - [x] Prompt when trying to close in a dirty state
 - [ ] More advanced controls, user configurations
+- [ ] Improved design
 - [ ] Menus/tabs ?
 - [ ] Syntax highlighting

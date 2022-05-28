@@ -8,7 +8,7 @@ defmodule Chaffinch.App.Text do
   Operations on text stored within the row-wise list of text structs inside the model struct.
   """
 
-  alias Chaffinch.App.{Cursor, State, EditorText}
+  alias Chaffinch.App.{Cursor, State, TextData, FileIO}
 
   require Logger
 
@@ -27,6 +27,44 @@ defmodule Chaffinch.App.Text do
   end
 
   @doc """
+  Import a textfile into the editor
+  """
+  def import_text(model) do
+    Path.join(model.fileinfo.path, model.fileinfo.filename)
+    |> FileIO.import_file()
+    |> case do
+      {:ok, new_textrows_list} ->
+        new_model = State.update_status_msg(model)
+        put_in(new_model.textrows, new_textrows_list)
+
+      {:error, _} ->
+        State.update_status_msg(model, "ERROR: Cannot load #{model.fileinfo.filename}.")
+    end
+  end
+
+  @doc """
+  Save the current state of the text
+  """
+  def save_text(model) do
+    path = Path.join(model.fileinfo.path, model.fileinfo.filename)
+    text_len = length(model.textrows)
+    last_line = List.last(model.textrows).text
+
+    model.textrows
+    |> Enum.map(fn x -> x.text <> "\n" end)
+    |> List.replace_at(text_len - 1, last_line)
+    |> Enum.join()
+    |> FileIO.write_file(path)
+    |> case do
+      {:ok, _} ->
+        %{model | dirty: 0} |> State.update_status_msg()
+
+      {:error, _} ->
+        State.update_status_msg(model, "ERROR: Cannot save #{model.fileinfo.filename}.")
+    end
+  end
+
+  @doc """
   Merge two text rows at index `idx`
   """
   def merge_lines(model, idx) do
@@ -36,7 +74,7 @@ defmodule Chaffinch.App.Text do
     new_textrow = [row1, row2] |> Enum.join()
 
     new_textrows_list =
-      List.replace_at(model.textrows, idx, %EditorText{text: new_textrow})
+      List.replace_at(model.textrows, idx, %TextData{text: new_textrow})
       |> List.delete_at(idx + 1)
 
     put_in(model.textrows, new_textrows_list)
@@ -50,7 +88,7 @@ defmodule Chaffinch.App.Text do
 
     model
     |> add_row(Enum.join(next_line))
-    |> update_row(%EditorText{text: this_line})
+    |> update_row(%TextData{text: this_line})
     |> Cursor.move_right()
     |> Cursor.sync_cursor()
     |> State.make_dirty()
@@ -147,7 +185,7 @@ defmodule Chaffinch.App.Text do
         new_text = _remove_chars(current_row_text, model.cursor.x, model.cursor.x + 1)
 
         model
-        |> update_row(%EditorText{text: new_text})
+        |> update_row(%TextData{text: new_text})
     end
     |> Cursor.sync_cursor()
     |> State.make_dirty()
@@ -169,17 +207,34 @@ defmodule Chaffinch.App.Text do
       {:ok, :line_beginning} ->
         cond do
           model.cursor.y != 0 ->
-            model |> Cursor.move_left() |> merge_lines(model.cursor.y - 1)
+            model
+            |> Cursor.move_left()
+            |> merge_lines(model.cursor.y - 1)
 
           true ->
             model
         end
 
-      {:ok, _} ->
+      {:ok, :line_end} ->
+        cond do
+          model.cursor.y != 0 and line_size(model) == {:ok, 0} ->
+            model
+            |> Cursor.move_left()
+            |> merge_lines(model.cursor.y - 1)
+
+          true ->
+            new_text = _remove_chars(current_row_text, model.cursor.x - 1, model.cursor.x)
+
+            model
+            |> update_row(%TextData{text: new_text})
+            |> Cursor.move_left()
+        end
+
+      {:ok, :in_line} ->
         new_text = _remove_chars(current_row_text, model.cursor.x - 1, model.cursor.x)
 
         model
-        |> update_row(%EditorText{text: new_text})
+        |> update_row(%TextData{text: new_text})
         |> Cursor.move_left()
     end
     |> Cursor.sync_cursor()
@@ -217,7 +272,7 @@ defmodule Chaffinch.App.Text do
     do:
       put_in(
         model.textrows,
-        List.insert_at(model.textrows, model.cursor.y + 1, %EditorText{})
+        List.insert_at(model.textrows, model.cursor.y + 1, %TextData{})
       )
 
   @doc """
@@ -227,7 +282,7 @@ defmodule Chaffinch.App.Text do
     do:
       put_in(
         model.textrows,
-        List.insert_at(model.textrows, model.cursor.y + 1, %EditorText{text: new_row_text})
+        List.insert_at(model.textrows, model.cursor.y + 1, %TextData{text: new_row_text})
       )
 
   @doc """
@@ -237,7 +292,7 @@ defmodule Chaffinch.App.Text do
     do:
       put_in(
         model.textrows,
-        List.insert_at(model.textrows, idx, %EditorText{text: new_row_text})
+        List.insert_at(model.textrows, idx, %TextData{text: new_row_text})
       )
 end
 
@@ -250,7 +305,7 @@ defmodule Chaffinch.App.Cursor do
   require IO.ANSI.Sequence
   require Logger
 
-  alias Chaffinch.App.Text
+  alias Chaffinch.App.{Text, State}
 
   IO.ANSI.Sequence.defsequence(:_show_cursor, "?25", "h")
   IO.ANSI.Sequence.defsequence(:_hide_cursor, "?25", "l")
@@ -310,6 +365,7 @@ defmodule Chaffinch.App.Cursor do
       :end -> model |> goto_end
     end
     |> sync_cursor
+    |> State.update_status_msg()
   end
 
   @doc """
@@ -453,11 +509,84 @@ defmodule Chaffinch.App.State do
   Module for other state modulations.
   """
 
+  alias Chaffinch.App.{Text, Cursor}
+
   @doc """
   Increment the dirtyness of the editor state
   """
-  def make_dirty(model), do: %{model | dirty: model.dirty + 1}
+  def make_dirty(model), do: %{model | dirty: model.dirty + 1} |> update_status_msg()
 
   def is_dirty?(model) when model.dirty != 0, do: true
   def is_dirty?(_other), do: false
+
+  def is_editable?(model) when model.active_view == :text, do: true
+  def is_editable?(_other), do: false
+
+  @doc """
+  Update the status with either filename and the state (dirty/clean) or an error message
+  """
+  def update_status_msg(model, errormsg \\ nil) do
+    cond do
+      errormsg != nil ->
+        %{model | status_msg: {:error, errormsg}}
+
+      true ->
+        %{model | status_msg: _build_status_message(model)}
+    end
+  end
+
+  @doc """
+  Set the active view to the `quitting in a dirty state` prompt if the state is in face dirty
+  """
+  def process_quit_command(model) do
+    cond do
+      model.active_view == :text and is_dirty?(model) ->
+        Cursor.hide_cursor()
+        %{model | active_view: :quit}
+
+      true ->
+        quit()
+    end
+  end
+
+  @doc """
+  Save the current state of the document with or without saving depending on the active view
+  """
+  def process_save_command(model) do
+    case model.active_view do
+      :text -> Text.save_text(model)
+      :quit -> quit()
+    end
+  end
+
+  @doc """
+  Return to the text from another view
+  """
+  def return_to_text(model) do
+    Cursor.show_cursor()
+    %{model | active_view: :text}
+  end
+
+  defp _build_status_message(model) do
+    pos_string = " | Line #{model.cursor.y + 1} | Column #{model.cursor.x + 1}"
+
+    cond do
+      model.fileinfo != nil ->
+        cond do
+          is_dirty?(model) ->
+            {:ok, "File: " <> model.fileinfo.filename <> "*" <> pos_string}
+
+          true ->
+            {:ok, "File: " <> model.fileinfo.filename <> pos_string}
+        end
+
+      true ->
+        {:ok, "No File" <> pos_string}
+    end
+  end
+
+  def quit() do
+    System.cmd("reset", [])
+    System.halt()
+  end
 end

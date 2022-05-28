@@ -1,0 +1,3 @@
+Hello there!
+This is the Chaffinch text editor.
+Try editing this text.

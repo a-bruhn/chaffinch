@@ -2,11 +2,11 @@ defmodule ChaffinchTest do
   use ExUnit.Case
   doctest Chaffinch
 
-  alias Chaffinch.App.{Text, Cursor, EditorState, EditorText, EditorCursor}
+  alias Chaffinch.App.{Text, Cursor, EditorState, TextData, CursorData}
 
   @test_state %EditorState{
-    textrows: [%EditorText{}],
-    cursor: %EditorCursor{x: 0, y: 0}
+    textrows: [%TextData{}],
+    cursor: %CursorData{x: 0, y: 0}
   }
 
   test "get line size oob" do
