@@ -318,8 +318,8 @@ defmodule Chaffinch.App.Cursor do
   """
   def sync_cursor(model) do
     ExTermbox.Bindings.set_cursor(
-      model.cursor.x + model.cursor.offset_x,
-      model.cursor.y + model.cursor.offset_y
+      model.cursor.x + model.deadspace.l + model.deadspace.p - model.offset_x,
+      model.cursor.y + model.deadspace.t - model.offset_y
     )
 
     model
@@ -585,8 +585,38 @@ defmodule Chaffinch.App.State do
     end
   end
 
+  @doc """
+  Ungracefully quit and just reset the console
+  """
   def quit() do
     System.cmd("reset", [])
     System.halt()
+  end
+
+  @doc """
+  Update model to reflect new window size
+  """
+  def resize_window(model, %{h: height, w: width}) do
+    %{model | window: %{height: height, width: width}}
+    |> sync_view()
+  end
+
+  @doc """
+  Sync the global offset of text and cursor when moving outside of the window
+  """
+  def sync_view(model) do
+    padding = length(Integer.digits(length(model.textrows))) + 1
+
+    offset_y = model.cursor.y + model.deadspace.t + model.deadspace.b - model.window.height
+
+    offset_x =
+      model.cursor.x + model.deadspace.l + model.deadspace.p +
+        model.deadspace.r - model.window.width
+
+    offset_y = if offset_y > 0, do: offset_y, else: 0
+    offset_x = if offset_x > 0, do: offset_x, else: 0
+
+    %{model | offset_y: offset_y, offset_x: offset_x, deadspace: %{model.deadspace | p: padding}}
+    |> Cursor.sync_cursor()
   end
 end

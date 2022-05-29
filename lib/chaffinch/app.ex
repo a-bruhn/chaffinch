@@ -13,8 +13,12 @@ defmodule Chaffinch.App do
   alias Chaffinch.App.{Cursor, Text, EditorState, CursorData, FileData, State, View}
 
   @tab_size 4
-  @cursor_offset_x 4
-  @cursor_offset_y 3
+
+  @deadspace_left 2
+  @deadspace_top 3
+  @deadspace_right 2
+  @deadspace_bottom 3
+  @padding 2
 
   @up key(:arrow_up)
   @down key(:arrow_down)
@@ -61,9 +65,9 @@ defmodule Chaffinch.App do
   Perform initial setup and output the initial app state.
   """
   @impl true
-  def init(_context) do
+  def init(%{window: window}) do
     Cursor.show_cursor()
-    ExTermbox.Bindings.set_cursor(@cursor_offset_x, @cursor_offset_y)
+    ExTermbox.Bindings.set_cursor(@deadspace_left + @padding, @deadspace_top)
 
     full_path = System.get_env("CHAFFINCH_FILE")
 
@@ -74,8 +78,16 @@ defmodule Chaffinch.App do
       end
 
     initial_state = %EditorState{
-      cursor: %CursorData{offset_x: @cursor_offset_x, offset_y: @cursor_offset_y},
-      fileinfo: fileinfo
+      cursor: %CursorData{},
+      fileinfo: fileinfo,
+      window: window,
+      deadspace: %{
+        t: @deadspace_top,
+        b: @deadspace_bottom,
+        l: @deadspace_left,
+        r: @deadspace_right,
+        p: @padding
+      }
     }
 
     case fileinfo do
@@ -127,9 +139,13 @@ defmodule Chaffinch.App do
       {:event, %{ch: ch}} when ch > 0 ->
         Text.insert_char(model, <<ch::utf8>>)
 
+      {:event, %{resize: event}} ->
+        State.resize_window(model, event)
+
       _ ->
         model
     end
+    |> State.sync_view()
   end
 
   @impl true
