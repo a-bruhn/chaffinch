@@ -27,10 +27,12 @@ defmodule Chaffinch.App.View do
 
     view bottom_bar: b_bar, top_bar: t_bar do
       panel(title: @app_title, height: :fill) do
-        case model.active_view do
-          :text -> _render_text(model)
-          :quit -> _render_quit_prompt()
-          _ -> _render_text(model)
+        viewport(offset_y: model.offset_y, offset_x: model.offset_x) do
+          case model.active_view do
+            :text -> _render_text(model)
+            :quit -> _render_quit_prompt()
+            _ -> _render_text(model)
+          end
         end
       end
     end
@@ -38,7 +40,8 @@ defmodule Chaffinch.App.View do
 
   defp _render_text(model) do
     for {textrow, idx} <- Enum.with_index(model.textrows) do
-      label(content: "#{idx + 1} #{textrow |> Map.get(:text)}")
+      padding = model.deadspace.p - 1 - length(Integer.digits(idx + 1))
+      label(content: "#{String.duplicate(" ", padding)}#{idx + 1} #{textrow |> Map.get(:text)}")
     end
   end
 

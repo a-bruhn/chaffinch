@@ -28,7 +28,9 @@ export CHAFFINCH_FILE=./welcome.txt && _build/dev/rel/chaffinch/bin/chaffinch st
 - [x] Status and message bars
   - [x] Basic control shortcuts
   - [x] File name and status at the top
-- [ ] X/Y scrolling with scrollbars
+- [ ] Handle text dimensions exceeding the window size
+  - [x] X/Y scrolling
+  - [ ] Scrollbars
 - [x] File I/O
   - [x] Loading a file ~with command line arguments~ through an environment variable
   - [x] Saving the current state
