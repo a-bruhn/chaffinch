@@ -1,7 +1,4 @@
 version: 2.1 
-parameters:
-  codecov:
-    file: cover/excoveralls.json
 orbs:
   codecov: codecov/codecov@3.1.1
 jobs:  # basic units of work in a run
@@ -49,4 +46,5 @@ jobs:  # basic units of work in a run
           # Read more: {{site.baseurl}}/2.0/collect-test-data/
           path: _build/test/lib/chaffinch
 
-      - codecov/upload
+      - codecov/upload:
+        file: cover/excoveralls.json
