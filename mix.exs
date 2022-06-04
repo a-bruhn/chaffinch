@@ -8,7 +8,9 @@ defmodule Chaffinch.MixProject do
       elixir: "~> 1.12",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
-      aliases: aliases()
+      aliases: aliases(),
+      test_coverage: [tool: ExCoveralls],
+      preferred_cli_env: [coveralls: :test]
     ]
   end
 
@@ -23,8 +25,8 @@ defmodule Chaffinch.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:ratatouille, "~> 0.5.1"}
-      # {:distillery, "~> 2.1.1"}
+      {:ratatouille, "~> 0.5.1"},
+      {:excoveralls, "~> 0.14.5", only: :test}
     ]
   end
 
