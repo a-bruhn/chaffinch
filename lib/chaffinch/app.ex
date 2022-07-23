@@ -106,34 +106,36 @@ defmodule Chaffinch.App do
   def update(model, msg) do
     case msg do
       {:event, %{key: key}} when key in @nochar_keys ->
-        cond do
-          State.is_editable?(model) ->
-            case key do
-              @up -> Cursor.move(model, :up)
-              @down -> Cursor.move(model, :down)
-              @left -> Cursor.move(model, :left)
-              @right -> Cursor.move(model, :right)
-              @home -> Cursor.move(model, :home)
-              @end_key -> Cursor.move(model, :end)
-              @tab_key -> Text.insert_char(model, model.tab)
-              @spacebar -> Text.insert_char(model, <<0x20>>)
-              @enter -> Text.insert_linebreak(model)
-              @delete_key -> Text.fwd_remove_char(model)
-              @backspace1 -> Text.bwd_remove_char(model)
-              @backspace2 -> Text.bwd_remove_char(model)
-              @save_key -> State.process_save_command(model)
-              @quit_key -> State.process_quit_command(model)
-              @escape -> State.return_to_text(model)
-              _ -> model
-            end
 
-          true ->
-            case key do
-              @save_key -> State.process_save_command(model)
-              @quit_key -> State.process_quit_command(model)
-              @escape -> State.return_to_text(model)
-              _ -> model
-            end
+        case key do
+          @save_key -> State.process_save_command(model)
+          @quit_key -> State.process_quit_command(model)
+          @escape -> State.return_to_text(model)
+          _ ->
+          cond do
+            State.is_editable?(model) -> # push down: tell, don't ask!
+              case key do
+                @up -> Cursor.move(model, :up)
+                @down -> Cursor.move(model, :down)
+                @left -> Cursor.move(model, :left)
+                @right -> Cursor.move(model, :right)
+                @home -> Cursor.move(model, :home)
+                @end_key -> Cursor.move(model, :end)
+                @tab_key -> Text.insert_char(model, model.tab)
+                @spacebar -> Text.insert_char(model, <<0x20>>)
+                @enter -> Text.insert_linebreak(model)
+                @delete_key -> Text.fwd_remove_char(model)
+                @backspace1 -> Text.bwd_remove_char(model)
+                @backspace2 -> Text.bwd_remove_char(model)
+                @save_key -> State.process_save_command(model)
+                @quit_key -> State.process_quit_command(model)
+                @escape -> State.return_to_text(model)
+                _ -> model
+              end
+
+            true -> model
+          end
+          _ -> model
         end
 
       {:event, %{ch: ch}} when ch > 0 ->

@@ -17,7 +17,7 @@ mix compile
 mix release
 ```
 
-At the moment, you have to set the file to be opened though an environment variable. You can start the application with a file opened like this:
+At the moment, you have to set the file to be opened though an environment variable. Using bash, you can start the application with a file opened like this:
 
 ```bash
 export CHAFFINCH_FILE=./welcome.txt && _build/dev/rel/chaffinch/bin/chaffinch start
@@ -25,7 +25,9 @@ export CHAFFINCH_FILE=./welcome.txt && _build/dev/rel/chaffinch/bin/chaffinch st
 
 ## Roadmap
 
-- [x] Basic text editing in frame
+- [ ] Basic text editing in frame
+  - [x] Basic commands
+  - [ ] Undo/redo 
 - [x] Status and message bars
   - [x] Basic control shortcuts
   - [x] File name and status at the top
@@ -36,6 +38,7 @@ export CHAFFINCH_FILE=./welcome.txt && _build/dev/rel/chaffinch/bin/chaffinch st
   - [x] Loading a file ~with command line arguments~ through an environment variable
   - [x] Saving the current state
   - [x] Prompt when trying to close in a dirty state
+  - [ ] Destination file path prompt when no file was specified upon opening of the app
 - [ ] More advanced controls, user configurations
 - [ ] Improved design
 - [ ] Menus/tabs ?

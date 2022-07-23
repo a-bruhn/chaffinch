@@ -14,8 +14,28 @@ defmodule Chaffinch.App.FileData do
   ]
 end
 
+defmodule Chaffinch.App.HistoryData do
+  defstruct [
+    actions: [],
+    current_index: 0
+  ]
+
+  @doc """
+  Insert an operation at a given index
+  """
+  def insert_operation(operation, index) do
+  end
+
+  @doc """
+  Delete an operation at a given index
+  """
+  def delete_operation(index) do
+  end
+
+end
+
 defmodule Chaffinch.App.EditorState do
-  alias Chaffinch.App.{TextData, CursorData}
+  alias Chaffinch.App.{TextData, CursorData, HistoryData}
 
   defstruct [
     :fileinfo,
@@ -28,6 +48,8 @@ defmodule Chaffinch.App.EditorState do
     cursor: %CursorData{},
     dirty: 0,
     tab: "    ",
-    deadspace: %{t: 0, b: 0, l: 0, r: 0, p: 0}
+    deadspace: %{t: 0, b: 0, l: 0, r: 0, p: 0},
+    selection: {%CursorData{}, %CursorData{}},
+    history: %HistoryData{}
   ]
 end

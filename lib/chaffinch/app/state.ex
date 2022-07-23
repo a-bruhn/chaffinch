@@ -1,7 +1,6 @@
-# TODO: Resolve duplicate/unncessary function calls and restructure
+# TODO: Refactor bad design: Entangle everything, separate concerns, and move complexity into Actions!
 #  Increase the overall amount of status handling
 #  Add type specs
-#  Separate concerns and use a single module to interact with the input/output layers
 
 defmodule Chaffinch.App.Text do
   @moduledoc """
@@ -109,7 +108,7 @@ defmodule Chaffinch.App.Text do
   end
 
   @doc """
-  Get the row at the current cursor y position  
+  Get the row at the current cursor y position
   """
   def row(model), do: Enum.at(model.textrows, model.cursor.y)
 
@@ -332,7 +331,7 @@ defmodule Chaffinch.App.Cursor do
   def can_move_down?(_other), do: false
 
   @doc """
-  Get the relative position within a row of text 
+  Get the relative position within a row of text
   """
   def pos_in_line(model) do
     model
