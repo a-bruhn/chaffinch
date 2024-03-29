@@ -20,7 +20,7 @@ mix release
 At the moment, you have to set the file to be opened though an environment variable. You can start the application with a file opened like this:
 
 ```bash
-export CHAFFINCH_FILE=./welcome.txt && _build/dev/rel/chaffinch/bin/chaffinch start
+CHAFFINCH_FILE=./welcome.txt _build/dev/rel/chaffinch/bin/chaffinch start
 ```
 
 ## Roadmap
