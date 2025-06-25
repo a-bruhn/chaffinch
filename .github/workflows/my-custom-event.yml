@@ -1,0 +1,14 @@
+name: My Custom Event Workflow
+
+on:
+  repository_dispatch:
+    types: [custom_upload]
+
+jobs:
+  run_custom_action:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Print payload
+        run: |
+          echo "Custom event triggered!"
+          echo "Payload: ${{ toJson(github.event.client_payload) }}"
