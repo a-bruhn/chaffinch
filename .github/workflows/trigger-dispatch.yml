@@ -5,10 +5,10 @@ name: Trigger Custom Event
 on:
   workflow_dispatch:
     inputs:
-      custom_value:
-        description: 'Custom value to send'
-        required: false
-        default: 'default-from-ui'
+      sources:
+        description: 'Sources to upload'
+        required: true
+        default: '["source1","source2"]'
 
 jobs:
   dispatch:
@@ -18,10 +18,10 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}  # see below
           REPO: ${{ github.repository }}
-          CUSTOM_VALUE: ${{ inputs.custom_value }}
+          CUSTOM_VALUE: ${{ inputs.sources }}
         run: |
           curl -X POST \
             -H "Authorization: token $GITHUB_TOKEN" \
             -H "Accept: application/vnd.github.v3+json" \
             https://api.github.com/repos/$REPO/dispatches \
-            -d "{\"event_type\":\"custom_upload\",\"client_payload\":{\"custom\":\"$CUSTOM_VALUE\"}}"
+            -d "{\"event_type\":\"custom_upload\",\"client_payload\":{\"sources\":$CUSTOM_VALUE}}"
