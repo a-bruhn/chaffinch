@@ -1,6 +1,7 @@
 name: My Custom Event Workflow
 
 on:
+  workflow_dispatch:
   repository_dispatch:
     types: [custom_upload]
 
