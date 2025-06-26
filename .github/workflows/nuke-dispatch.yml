@@ -1,0 +1,13 @@
+name: "Nuke: Run Deletion"
+
+on:
+  repository_dispatch:
+    types: [custom_nuke]
+
+jobs:
+  run_custom_action:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Print payload
+        run: |
+          echo "Manual database deletion triggered!"

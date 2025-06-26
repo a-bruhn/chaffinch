@@ -1,14 +1,7 @@
-# .github/workflows/trigger-dispatch.yml
-
-name: Trigger Custom Event
+name: "Nuke: Trigger Custom Event"
 
 on:
   workflow_dispatch:
-    inputs:
-      sources:
-        description: 'Sources to upload'
-        required: true
-        default: '["GitHub","TechDocs"]'
 
 jobs:
   dispatch:
@@ -16,7 +9,7 @@ jobs:
     steps:
       - name: Trigger repository_dispatch
         env:
-          GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}  # see below
+          GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
           REPO: ${{ github.repository }}
           CUSTOM_VALUE: ${{ inputs.sources }}
         run: |
@@ -24,4 +17,4 @@ jobs:
             -H "Authorization: token $GITHUB_TOKEN" \
             -H "Accept: application/vnd.github.v3+json" \
             https://api.github.com/repos/$REPO/dispatches \
-            -d "{\"event_type\":\"custom_upload\",\"client_payload\":{\"sources\":$CUSTOM_VALUE}}"
+            -d "{\"event_type\":\"custom_nuke\"}"

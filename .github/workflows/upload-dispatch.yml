@@ -1,4 +1,4 @@
-name: My Custom Event Workflow
+name: "Upload: Run Upload"
 
 on:
   repository_dispatch:
@@ -10,5 +10,5 @@ jobs:
     steps:
       - name: Print payload
         run: |
-          echo "Custom event triggered!"
+          echo "Manual database upload triggered!"
           echo "Payload: ${{ toJson(github.event.client_payload) }}"
